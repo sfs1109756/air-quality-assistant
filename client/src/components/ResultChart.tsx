@@ -32,6 +32,15 @@ function pivot(rows: Record<string, unknown>[], x: string, groupBy: string, y: s
   return { data: [...byX.values()], keys: [...series] };
 }
 
+const WORDS: Record<string, string> = { pm25: 'PM2.5', pm10: 'PM10', co2: 'CO₂', tvoc: 'TVOC', avg: 'Avg', max: 'Max', min: 'Min' };
+
+/** 'avg_pm25' → 'Avg PM2.5', 'hours_above_1000' → 'Hours above 1000'. */
+export function prettyLabel(key: string): string {
+  const words = key.split('_').map((w) => WORDS[w.toLowerCase()] ?? w);
+  const s = words.join(' ');
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function shortTick(v: unknown): string {
   const s = String(v);
   // '2026-10-09 13:00' → '10-09 13:00'; '2026-10-09' → '10-09'
@@ -49,37 +58,46 @@ export function ResultChart({ spec, rows }: { spec: ChartSpec; rows: Record<stri
     data,
     margin: { top: 8, right: 16, left: 0, bottom: 8 },
   };
-  const axes = (
-    <>
-      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-      <XAxis dataKey={spec.x} tickFormatter={shortTick} tick={{ fontSize: 12, fill: 'var(--muted)' }} minTickGap={16} />
-      <YAxis tick={{ fontSize: 12, fill: 'var(--muted)' }} width={48} />
-      <Tooltip
-        contentStyle={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }}
-        labelStyle={{ color: 'var(--text)' }}
-      />
-      {keys.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
-    </>
+  // Recharts finds its children by type, so axes are rendered inline (not in a fragment).
+  const grid = <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />;
+  const xAxis = <XAxis dataKey={spec.x} tickFormatter={shortTick} tick={{ fontSize: 12, fill: 'var(--muted)' }} minTickGap={16} />;
+  const yAxis = <YAxis tick={{ fontSize: 12, fill: 'var(--muted)' }} width={48} />;
+  const tooltip = (
+    <Tooltip
+      contentStyle={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }}
+      labelStyle={{ color: 'var(--text)' }}
+    />
   );
+  const legend = keys.length > 1 ? <Legend wrapperStyle={{ fontSize: 12 }} /> : null;
 
   return (
     <div className="chart">
       <ResponsiveContainer width="100%" height={300}>
         {spec.type === 'bar' ? (
           <BarChart {...common}>
-            {axes}
+            {grid}
+            {xAxis}
+            {yAxis}
+            {tooltip}
+            {legend}
             {keys.map((k, i) => (
-              <Bar key={k} dataKey={k} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
+              <Bar key={k} dataKey={k} name={spec.groupBy ? k : prettyLabel(k)} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} animationDuration={350} />
             ))}
           </BarChart>
         ) : (
           <LineChart {...common}>
-            {axes}
+            {grid}
+            {xAxis}
+            {yAxis}
+            {tooltip}
+            {legend}
             {keys.map((k, i) => (
               <Line
                 key={k}
                 type="monotone"
                 dataKey={k}
+                name={spec.groupBy ? k : prettyLabel(k)}
+                animationDuration={350}
                 stroke={PALETTE[i % PALETTE.length]}
                 strokeWidth={2}
                 dot={data.length < 40}

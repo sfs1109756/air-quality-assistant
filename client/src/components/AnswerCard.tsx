@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { postJSON } from '../api';
 import type { AskResult } from '../types';
-import { ResultChart } from './ResultChart';
+import { prettyLabel, ResultChart } from './ResultChart';
 
 function toCsv(columns: string[], rows: Record<string, unknown>[]): string {
   const esc = (v: unknown) => {
@@ -88,7 +88,7 @@ export function AnswerCard({ initial }: { initial: AskResult }) {
         <div className="scroll-x table-wrap">
           <table className="data">
             <thead>
-              <tr>{result.columns.map((c) => <th key={c}>{c}</th>)}</tr>
+              <tr>{result.columns.map((c) => <th key={c} title={c}>{prettyLabel(c)}</th>)}</tr>
             </thead>
             <tbody>
               {result.rows.slice(0, 200).map((r, i) => (

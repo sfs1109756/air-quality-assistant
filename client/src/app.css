@@ -1,11 +1,11 @@
 .section-title { font-size: 15px; margin: 0 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 24px; }
 .room-card { background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--good); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); }
 .room-card.warn { border-left-color: var(--warn); }
 .room-card.bad { border-left-color: var(--bad); }
 .room-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
-.metric { background: var(--bg); border-radius: 8px; padding: 6px 8px; }
+.metric { background: var(--bg); border-radius: 8px; padding: 6px 8px; min-width: 0; }
 .metric.good .m-value { color: var(--good); }
 .metric.warn .m-value { color: var(--warn); }
 .metric.bad .m-value { color: var(--bad); }
@@ -31,3 +31,8 @@
 textarea.sql { min-height: 140px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; }
 .table-wrap { margin-top: 10px; max-height: 400px; overflow-y: auto; }
 @media (max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) {
+  .suggest { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .suggest .chip { white-space: nowrap; flex-shrink: 0; }
+  .ask-form input { font-size: 15px; }
+}
