@@ -1,6 +1,6 @@
 # 🌬️ Air Quality Assistant
 
-Ask questions about indoor air-quality sensor data in plain English — *"When was CO2 highest in the conference room yesterday?"* — and get a short answer, a chart, and the SQL behind it.
+Ask questions about indoor air-quality sensor data in plain English — _"When was CO2 highest in the conference room yesterday?"_ — and get a short answer, a chart, and the SQL behind it.
 
 **Runs on a local AI model by default** (Ollama). Built-in questions, live room cards and the SQL editor work with no AI at all.
 
@@ -66,11 +66,11 @@ docker compose up -d && docker compose exec ollama ollama pull qwen2.5:7b
 
 Click **Import CSV** (or `POST /api/import`). Headers are matched loosely, so most exports work as-is:
 
-| Field | Accepted headers (examples) |
-|---|---|
-| Time | `timestamp`, `time`, `datetime`, `created_at` — ISO 8601, `YYYY-MM-DD HH:MM`, `DD/MM/YYYY HH:MM`, Unix seconds or ms |
-| Room / device | `room`, `location`, `zone` and/or `device_id`, `sensor`, `serial` |
-| Readings | `pm25` / `PM2.5 (µg/m³)`, `pm10`, `co2` / `CO2 ppm`, `tvoc` / `voc`, `temperature` / `temp`, `humidity` / `rh` |
+| Field         | Accepted headers (examples)                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Time          | `timestamp`, `time`, `datetime`, `created_at` — ISO 8601, `YYYY-MM-DD HH:MM`, `DD/MM/YYYY HH:MM`, Unix seconds or ms |
+| Room / device | `room`, `location`, `zone` and/or `device_id`, `sensor`, `serial`                                                    |
+| Readings      | `pm25` / `PM2.5 (µg/m³)`, `pm10`, `co2` / `CO2 ppm`, `tvoc` / `voc`, `temperature` / `temp`, `humidity` / `rh`       |
 
 Comma, semicolon and tab separated files all work, decimal commas too. Rows with unreadable timestamps are skipped and reported, and obviously broken values (CO₂ below 250 ppm, humidity over 100%) are ignored. Download a template from the app or `GET /api/import/template`. Imported data is kept until you choose **Back to demo data**.
 
@@ -89,16 +89,16 @@ Set `LLM_PROVIDER` in `server/.env`: `ollama` (default), `openai` (any OpenAI-co
 
 ## API
 
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/api/ask` | `{ question, history? }` → SQL, rows, chart spec |
-| `POST` | `/api/summarize` | `{ question, columns, rows }` → NDJSON stream of the plain-English answer |
-| `GET` | `/api/insights` | Rule-based weekly insights (no AI) |
-| `POST` | `/api/import` · `GET /api/import/template` · `GET /api/data-source` | CSV import and current data info |
-| `GET` | `/api/presets` · `POST /api/presets/:id` | Built-in questions (no AI) |
-| `POST` | `/api/sql` | Run edited SQL (same read-only guard) |
-| `GET` | `/api/overview` | Latest reading + 24h stats per room |
-| `GET` | `/api/schema` · `POST /api/reseed` | Schema text · back to fresh demo data |
+| Method | Path                                                                | Notes                                                                     |
+| ------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/ask`                                                          | `{ question, history? }` → SQL, rows, chart spec                          |
+| `POST` | `/api/summarize`                                                    | `{ question, columns, rows }` → NDJSON stream of the plain-English answer |
+| `GET`  | `/api/insights`                                                     | Rule-based weekly insights (no AI)                                        |
+| `POST` | `/api/import` · `GET /api/import/template` · `GET /api/data-source` | CSV import and current data info                                          |
+| `GET`  | `/api/presets` · `POST /api/presets/:id`                            | Built-in questions (no AI)                                                |
+| `POST` | `/api/sql`                                                          | Run edited SQL (same read-only guard)                                     |
+| `GET`  | `/api/overview`                                                     | Latest reading + 24h stats per room                                       |
+| `GET`  | `/api/schema` · `POST /api/reseed`                                  | Schema text · back to fresh demo data                                     |
 
 ## Scripts
 

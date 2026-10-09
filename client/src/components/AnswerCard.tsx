@@ -70,12 +70,26 @@ export function AnswerCard({ initial, aiReady }: { initial: AskResult; aiReady: 
         <span className="q-icon">?</span>
         {result.question}
         <span className={`chip src-${result.source}`}>
-          {result.source === 'ai' ? `AI · ${result.attempts > 1 ? `fixed in ${result.attempts} tries` : '1st try'}` : result.source === 'preset' ? 'built-in' : 'edited SQL'}
+          {result.source === 'ai'
+            ? `AI · ${result.attempts > 1 ? `fixed in ${result.attempts} tries` : '1st try'}`
+            : result.source === 'preset'
+              ? 'built-in'
+              : 'edited SQL'}
         </span>
       </div>
       {result.notice && <div className="notice small">{result.notice}</div>}
-      {answer && <p className="a">{answer}{answering && <span className="caret" />}</p>}
-      {!answer && answering && <p className="a muted"><span className="spinner" />Writing a summary…</p>}
+      {answer && (
+        <p className="a">
+          {answer}
+          {answering && <span className="caret" />}
+        </p>
+      )}
+      {!answer && answering && (
+        <p className="a muted">
+          <span className="spinner" />
+          Writing a summary…
+        </p>
+      )}
       {!answer && !answering && result.rows.length === 0 && <p className="a muted">No readings matched.</p>}
 
       <ResultChart spec={result.chart} rows={result.rows} />
@@ -111,11 +125,21 @@ export function AnswerCard({ initial, aiReady }: { initial: AskResult; aiReady: 
         <div className="scroll-x table-wrap">
           <table className="data">
             <thead>
-              <tr>{result.columns.map((c) => <th key={c} title={c}>{prettyLabel(c)}</th>)}</tr>
+              <tr>
+                {result.columns.map((c) => (
+                  <th key={c} title={c}>
+                    {prettyLabel(c)}
+                  </th>
+                ))}
+              </tr>
             </thead>
             <tbody>
               {result.rows.slice(0, 200).map((r, i) => (
-                <tr key={i}>{result.columns.map((c) => <td key={c}>{String(r[c] ?? '')}</td>)}</tr>
+                <tr key={i}>
+                  {result.columns.map((c) => (
+                    <td key={c}>{String(r[c] ?? '')}</td>
+                  ))}
+                </tr>
               ))}
             </tbody>
           </table>

@@ -56,7 +56,9 @@ export function Overview({ refreshKey }: { refreshKey: number }) {
                 {r.temperature != null && <Metric label="Temp" value={r.temperature} unit="°C" />}
               </div>
               <div className="small muted">
-                {[r.pm25_24h != null && `24h avg PM2.5 ${r.pm25_24h}`, r.co2_peak_24h != null && `CO₂ peak ${r.co2_peak_24h} ppm`].filter(Boolean).join(' · ')}
+                {[r.pm25_24h != null && `24h avg PM2.5 ${r.pm25_24h}`, r.co2_peak_24h != null && `CO₂ peak ${r.co2_peak_24h} ppm`]
+                  .filter(Boolean)
+                  .join(' · ')}
               </div>
             </div>
           );

@@ -12,7 +12,8 @@ process.env.DB_PATH = path.join(tmp, 'test.db');
 
 let api = '';
 const servers: http.Server[] = [];
-const listen = (s: http.Server) => new Promise<string>((r) => s.listen(0, () => r(`http://127.0.0.1:${(s.address() as AddressInfo).port}`)));
+const listen = (s: http.Server) =>
+  new Promise<string>((r) => s.listen(0, () => r(`http://127.0.0.1:${(s.address() as AddressInfo).port}`)));
 
 const fakeOllama = http.createServer((req, res) => {
   let raw = '';
@@ -47,7 +48,8 @@ after(() => {
   fs.rmSync(tmp, { recursive: true, force: true });
 });
 
-const post = (p: string, body: unknown) => fetch(`${api}${p}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+const post = (p: string, body: unknown) =>
+  fetch(`${api}${p}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 test('seeds demo data and serves the overview', async () => {
   const src = await (await fetch(`${api}/api/data-source`)).json();
@@ -66,7 +68,10 @@ test('ask self-corrects bad SQL and returns a chart spec', async () => {
 
 test('summaries stream', async () => {
   const res = await post('/api/summarize', { question: 'q', columns: ['room'], rows: [{ room: 'Cafeteria' }] });
-  const events = (await res.text()).trim().split('\n').map((l) => JSON.parse(l));
+  const events = (await res.text())
+    .trim()
+    .split('\n')
+    .map((l) => JSON.parse(l));
   assert.equal(events.at(-1).text, 'Cafeteria was worst.');
 });
 
@@ -95,7 +100,11 @@ test('insights find the demo problems', async () => {
 test('CSV import replaces the data and survives restart checks', async () => {
   const csv = [
     'Time;Location;Sensor ID;PM2.5 (µg/m³);CO2 ppm;Temp',
-    ...Array.from({ length: 48 }, (_, i) => `09/10/2026 ${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'};Lab 2;esp-7;${(10 + i / 4).toFixed(1).replace('.', ',')};${600 + i * 10};24`),
+    ...Array.from(
+      { length: 48 },
+      (_, i) =>
+        `09/10/2026 ${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'};Lab 2;esp-7;${(10 + i / 4).toFixed(1).replace('.', ',')};${600 + i * 10};24`,
+    ),
     'not a date;Lab 2;esp-7;1;1;1',
   ].join('\n');
   const form = new FormData();
@@ -113,7 +122,11 @@ test('CSV import replaces the data and survives restart checks', async () => {
   assert.equal(src.source.kind, 'import');
   const { ensureFreshData } = await import('./db.js');
   ensureFreshData(); // imported data must not be replaced by demo data
-  const { rows } = await (await post('/api/sql', { sql: 'SELECT room, MAX(co2) AS peak FROM readings JOIN devices ON devices.id = readings.device_id GROUP BY room' })).json();
+  const { rows } = await (
+    await post('/api/sql', {
+      sql: 'SELECT room, MAX(co2) AS peak FROM readings JOIN devices ON devices.id = readings.device_id GROUP BY room',
+    })
+  ).json();
   assert.deepEqual(rows, [{ room: 'Lab 2', peak: 1070 }]);
 });
 

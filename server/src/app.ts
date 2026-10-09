@@ -58,7 +58,9 @@ app.post(
     const columns: string[] = Array.isArray(req.body?.columns) ? req.body.columns.map(String).slice(0, 30) : [];
     const rows: Record<string, unknown>[] = Array.isArray(req.body?.rows) ? req.body.rows.slice(0, 60) : [];
     if (!question || columns.length === 0) throw new HttpError(400, 'Question and result columns are required.');
-    await streamText(req, res, (emit, signal) => summarize(question, { columns, rows, truncated: Boolean(req.body?.truncated) }, emit, signal));
+    await streamText(req, res, (emit, signal) =>
+      summarize(question, { columns, rows, truncated: Boolean(req.body?.truncated) }, emit, signal),
+    );
   }),
 );
 

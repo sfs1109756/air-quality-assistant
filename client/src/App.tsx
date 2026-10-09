@@ -29,7 +29,9 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    getJSON<{ presets: Preset[] }>('/api/presets').then((d) => setPresets(d.presets)).catch(() => {});
+    getJSON<{ presets: Preset[] }>('/api/presets')
+      .then((d) => setPresets(d.presets))
+      .catch(() => {});
   }, []);
 
   const push = (r: AskResult) => setAnswers((a) => [{ ...r, key: Date.now() }, ...a]);
@@ -124,7 +126,12 @@ export default function App() {
             </button>
           ))}
         </div>
-        {busy && <p className="small muted"><span className="spinner" />Thinking… writing SQL and running it.</p>}
+        {busy && (
+          <p className="small muted">
+            <span className="spinner" />
+            Thinking… writing SQL and running it.
+          </p>
+        )}
         {error && <div className="error">{error}</div>}
       </section>
 

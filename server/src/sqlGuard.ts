@@ -8,7 +8,8 @@ import { readonlyDb } from './db.js';
  *  4. Results are capped with an outer LIMIT.
  */
 
-const FORBIDDEN = /\b(insert|update|delete|drop|alter|create|attach|detach|pragma|replace|vacuum|reindex|analyze|begin|commit|rollback|savepoint|release|load_extension)\b/i;
+const FORBIDDEN =
+  /\b(insert|update|delete|drop|alter|create|attach|detach|pragma|replace|vacuum|reindex|analyze|begin|commit|rollback|savepoint|release|load_extension)\b/i;
 
 export const MAX_ROWS = 500;
 

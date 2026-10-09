@@ -69,7 +69,13 @@ export function parseCsv(text: string): string[][] {
   return rows;
 }
 
-const norm = (h: string) => h.trim().toLowerCase().replace(/[µ]/g, 'u').replace(/[()[\]/%³]/g, '').replace(/[\s-]+/g, '_');
+const norm = (h: string) =>
+  h
+    .trim()
+    .toLowerCase()
+    .replace(/[µ]/g, 'u')
+    .replace(/[()[\]/%³]/g, '')
+    .replace(/[\s-]+/g, '_');
 
 export function mapHeaders(headers: string[]): Record<string, number> {
   const out: Record<string, number> = {};
@@ -140,7 +146,8 @@ export function importCsv(text: string, fileName = 'upload.csv'): ImportResult {
   const headers = rows[0];
   const cols = mapHeaders(headers);
   if (cols.ts === undefined) throw new Error('Could not find a timestamp column (e.g. "timestamp", "time", "datetime").');
-  if (cols.device === undefined && cols.room === undefined) throw new Error('Could not find a room or device column (e.g. "room", "location", "device_id").');
+  if (cols.device === undefined && cols.room === undefined)
+    throw new Error('Could not find a room or device column (e.g. "room", "location", "device_id").');
   const metricCols = METRICS.filter((m) => cols[m] !== undefined);
   if (metricCols.length === 0) throw new Error('No sensor columns found. Expected some of: pm25, pm10, co2, tvoc, temperature, humidity.');
 
@@ -162,7 +169,10 @@ export function importCsv(text: string, fileName = 'upload.csv'): ImportResult {
       skip('no room or device');
       continue;
     }
-    const values = Object.fromEntries(METRICS.map((m) => [m, cols[m] !== undefined ? num(r[cols[m]]) : null])) as Record<MetricCol, number | null>;
+    const values = Object.fromEntries(METRICS.map((m) => [m, cols[m] !== undefined ? num(r[cols[m]]) : null])) as Record<
+      MetricCol,
+      number | null
+    >;
     if (metricCols.every((m) => values[m] === null)) {
       skip('no sensor values');
       continue;
@@ -220,5 +230,10 @@ export function importCsv(text: string, fileName = 'upload.csv'): ImportResult {
 }
 
 function slug(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'device';
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'device'
+  );
 }

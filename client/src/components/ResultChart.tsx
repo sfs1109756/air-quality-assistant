@@ -1,15 +1,4 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { ChartSpec } from '../types';
 
 const PALETTE = ['#2f6fed', '#e5484d', '#12a594', '#f5a524', '#8e4ec6', '#ec5d95', '#3e9b4f', '#7c66dc'];
@@ -50,9 +39,7 @@ function shortTick(v: unknown): string {
 export function ResultChart({ spec, rows }: { spec: ChartSpec; rows: Record<string, unknown>[] }) {
   if (spec.type === 'none' || !spec.x || !spec.y?.length || rows.length === 0) return null;
 
-  const { data, keys } = spec.groupBy
-    ? pivot(rows, spec.x, spec.groupBy, spec.y[0])
-    : { data: rows, keys: spec.y };
+  const { data, keys } = spec.groupBy ? pivot(rows, spec.x, spec.groupBy, spec.y[0]) : { data: rows, keys: spec.y };
 
   const common = {
     data,
@@ -81,7 +68,14 @@ export function ResultChart({ spec, rows }: { spec: ChartSpec; rows: Record<stri
             {tooltip}
             {legend}
             {keys.map((k, i) => (
-              <Bar key={k} dataKey={k} name={spec.groupBy ? k : prettyLabel(k)} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} animationDuration={350} />
+              <Bar
+                key={k}
+                dataKey={k}
+                name={spec.groupBy ? k : prettyLabel(k)}
+                fill={PALETTE[i % PALETTE.length]}
+                radius={[4, 4, 0, 0]}
+                animationDuration={350}
+              />
             ))}
           </BarChart>
         ) : (

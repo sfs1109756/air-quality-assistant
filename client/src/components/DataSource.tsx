@@ -19,7 +19,8 @@ interface ImportResult {
   warnings: string[];
 }
 
-const day = (ts: string | null) => (ts ? new Date(ts.replace(' ', 'T')).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '–');
+const day = (ts: string | null) =>
+  ts ? new Date(ts.replace(' ', 'T')).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '–';
 
 /** Shows where the data comes from; import your own CSV or go back to demo data. */
 export function DataSource({ refreshKey, onChanged }: { refreshKey: number; onChanged: () => void }) {
@@ -28,7 +29,9 @@ export function DataSource({ refreshKey, onChanged }: { refreshKey: number; onCh
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    getJSON<SourceInfo>('/api/data-source').then(setInfo).catch(() => {});
+    getJSON<SourceInfo>('/api/data-source')
+      .then(setInfo)
+      .catch(() => {});
   }, [refreshKey]);
 
   async function onFile(file?: File) {
