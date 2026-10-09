@@ -36,13 +36,37 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 const rw = new Database(DB_PATH);
 rw.pragma('journal_mode = WAL');
 rw.exec(SCHEMA_SQL);
+rw.exec('CREATE TABLE IF NOT EXISTS app_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
 
-/** Regenerates the demo data when the DB is empty or the latest reading is over a day old. */
+/** Where the current readings came from: the built-in generator or a user's CSV import. */
+export type DataSource = { kind: 'demo' } | { kind: 'import'; file: string; at: string };
+
+export function getDataSource(): DataSource {
+  const row = rw.prepare("SELECT value FROM app_meta WHERE key = 'source'").get() as { value: string } | undefined;
+  try {
+    return row ? (JSON.parse(row.value) as DataSource) : { kind: 'demo' };
+  } catch {
+    return { kind: 'demo' };
+  }
+}
+
+export function setDataSource(source: DataSource): void {
+  rw.prepare("INSERT INTO app_meta (key, value) VALUES ('source', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(
+    JSON.stringify(source),
+  );
+}
+
+/**
+ * Regenerates the demo data when the DB is empty or the demo data is over a day old.
+ * Imported data is never overwritten automatically.
+ */
 export function ensureFreshData(force = false): void {
   const latest = rw.prepare('SELECT MAX(ts) AS ts FROM readings').get() as { ts: string | null };
-  const stale = !latest.ts || Date.now() - localTsToDate(latest.ts).getTime() > 24 * 3600 * 1000;
+  const isDemo = getDataSource().kind === 'demo';
+  const stale = !latest.ts || (isDemo && Date.now() - localTsToDate(latest.ts).getTime() > 24 * 3600 * 1000);
   if (force || stale) {
     const n = seed(rw);
+    setDataSource({ kind: 'demo' });
     console.log(`Seeded ${n.toLocaleString()} demo readings.`);
   }
 }

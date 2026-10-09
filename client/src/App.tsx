@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { ApiError, getJSON, postJSON } from './api';
 import { AiNotice, AiStatus, useHealth } from './components/AiStatus';
 import { AnswerCard } from './components/AnswerCard';
+import { DataSource } from './components/DataSource';
+import { Insights } from './components/Insights';
 import { Overview } from './components/Overview';
 import type { AskResult } from './types';
 
@@ -62,7 +64,7 @@ export default function App() {
     setBusy(true);
     setError('');
     try {
-      push(await postJSON<AskResult>(`/api/presets/${p.id}`, { summarize: Boolean(health?.ok) }));
+      push(await postJSON<AskResult>(`/api/presets/${p.id}`, {}));
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -70,8 +72,7 @@ export default function App() {
     }
   }
 
-  async function reseed() {
-    await postJSON('/api/reseed', {});
+  function dataChanged() {
     setRefreshKey((k) => k + 1);
     setAnswers([]);
   }
@@ -83,16 +84,13 @@ export default function App() {
           <h1>🌬️ Air Quality Assistant</h1>
           <p>Ask questions about your building's sensor data in plain English.</p>
         </div>
-        <div className="row">
-          <button className="ghost small" onClick={reseed} title="Regenerate 30 days of demo data ending now">
-            Refresh demo data
-          </button>
-          <AiStatus health={health} />
-        </div>
+        <AiStatus health={health} />
       </header>
 
       <AiNotice health={health} />
+      <DataSource refreshKey={refreshKey} onChanged={dataChanged} />
       <Overview refreshKey={refreshKey} />
+      <Insights refreshKey={refreshKey} onAsk={(q) => ask(undefined, q)} aiReady={Boolean(health?.ok)} />
 
       <section className="ask">
         <form onSubmit={ask} className="ask-form">
@@ -126,13 +124,13 @@ export default function App() {
             </button>
           ))}
         </div>
-        {busy && <p className="small muted"><span className="spinner" />Thinking… writing SQL, running it, then summarising.</p>}
+        {busy && <p className="small muted"><span className="spinner" />Thinking… writing SQL and running it.</p>}
         {error && <div className="error">{error}</div>}
       </section>
 
       <section className="stack">
         {answers.map((a) => (
-          <AnswerCard key={a.key} initial={a} />
+          <AnswerCard key={a.key} initial={a} aiReady={Boolean(health?.ok)} />
         ))}
       </section>
     </div>

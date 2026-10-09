@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { postJSON } from '../api';
+import { useEffect, useState } from 'react';
+import { postJSON, streamPost } from '../api';
 import type { AskResult } from '../types';
 import { prettyLabel, ResultChart } from './ResultChart';
 
@@ -11,8 +11,29 @@ function toCsv(columns: string[], rows: Record<string, unknown>[]): string {
   return [columns.join(','), ...rows.map((r) => columns.map((c) => esc(r[c])).join(','))].join('\n');
 }
 
-export function AnswerCard({ initial }: { initial: AskResult }) {
+export function AnswerCard({ initial, aiReady }: { initial: AskResult; aiReady: boolean }) {
   const [result, setResult] = useState(initial);
+  const [answer, setAnswer] = useState(initial.answer ?? '');
+  const [answering, setAnswering] = useState(false);
+
+  // Stream the plain-English answer once the numbers are on screen.
+  useEffect(() => {
+    if (initial.answer || !aiReady || initial.rows.length === 0) return;
+    const controller = new AbortController();
+    setAnswering(true);
+    streamPost(
+      '/api/summarize',
+      { question: initial.question, columns: initial.columns, rows: initial.rows.slice(0, 60), truncated: initial.truncated },
+      setAnswer,
+      controller.signal,
+    )
+      .then((d) => setAnswer(d.text))
+      .catch(() => {
+        /* the chart and table still answer the question */
+      })
+      .finally(() => setAnswering(false));
+    return () => controller.abort();
+  }, [initial, aiReady]);
   const [sql, setSql] = useState(initial.sql);
   const [showSql, setShowSql] = useState(false);
   const [showTable, setShowTable] = useState(initial.chart.type === 'none');
@@ -25,6 +46,7 @@ export function AnswerCard({ initial }: { initial: AskResult }) {
     try {
       const r = await postJSON<Omit<AskResult, 'question' | 'chart' | 'answer'>>('/api/sql', { sql });
       setResult({ ...result, ...r, source: 'manual', answer: null, chart: result.chart });
+      setAnswer(''); // the old answer described the old query
       setShowTable(true);
     } catch (err) {
       setError((err as Error).message);
@@ -52,8 +74,9 @@ export function AnswerCard({ initial }: { initial: AskResult }) {
         </span>
       </div>
       {result.notice && <div className="notice small">{result.notice}</div>}
-      {result.answer && <p className="a">{result.answer}</p>}
-      {!result.answer && result.rows.length === 0 && <p className="a muted">No readings matched.</p>}
+      {answer && <p className="a">{answer}{answering && <span className="caret" />}</p>}
+      {!answer && answering && <p className="a muted"><span className="spinner" />Writing a summary…</p>}
+      {!answer && !answering && result.rows.length === 0 && <p className="a muted">No readings matched.</p>}
 
       <ResultChart spec={result.chart} rows={result.rows} />
 

@@ -41,25 +41,22 @@ export function Overview({ refreshKey }: { refreshKey: number }) {
       </div>
       <div className="rooms">
         {rooms.map((r) => {
-          const worst: Level = [pmLevel(r.pm25), co2Level(r.co2), tvocLevel(r.tvoc)].includes('bad')
-            ? 'bad'
-            : [pmLevel(r.pm25), co2Level(r.co2), tvocLevel(r.tvoc)].includes('warn')
-              ? 'warn'
-              : 'good';
+          const levels = [r.pm25 != null && pmLevel(r.pm25), r.co2 != null && co2Level(r.co2), r.tvoc != null && tvocLevel(r.tvoc)];
+          const worst: Level = levels.includes('bad') ? 'bad' : levels.includes('warn') ? 'warn' : 'good';
           return (
             <div key={r.id} className={`room-card ${worst}`}>
               <div className="room-head">
                 <strong>{r.room}</strong>
-                <span className="small muted">Floor {r.floor}</span>
+                {r.floor > 0 && <span className="small muted">Floor {r.floor}</span>}
               </div>
               <div className="metrics">
-                <Metric label="PM2.5" value={r.pm25} unit="µg/m³" level={pmLevel(r.pm25)} />
-                <Metric label="CO₂" value={r.co2} unit="ppm" level={co2Level(r.co2)} />
-                <Metric label="TVOC" value={r.tvoc} unit="ppb" level={tvocLevel(r.tvoc)} />
-                <Metric label="Temp" value={r.temperature} unit="°C" />
+                {r.pm25 != null && <Metric label="PM2.5" value={r.pm25} unit="µg/m³" level={pmLevel(r.pm25)} />}
+                {r.co2 != null && <Metric label="CO₂" value={r.co2} unit="ppm" level={co2Level(r.co2)} />}
+                {r.tvoc != null && <Metric label="TVOC" value={r.tvoc} unit="ppb" level={tvocLevel(r.tvoc)} />}
+                {r.temperature != null && <Metric label="Temp" value={r.temperature} unit="°C" />}
               </div>
               <div className="small muted">
-                24h avg PM2.5 {r.pm25_24h} · CO₂ peak {r.co2_peak_24h} ppm
+                {[r.pm25_24h != null && `24h avg PM2.5 ${r.pm25_24h}`, r.co2_peak_24h != null && `CO₂ peak ${r.co2_peak_24h} ppm`].filter(Boolean).join(' · ')}
               </div>
             </div>
           );

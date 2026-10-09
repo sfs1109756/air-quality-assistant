@@ -1,5 +1,5 @@
 import { formatTs, nowLocal, readonlyDb } from './db.js';
-import { chat, chatJSON, type Message } from './llm.js';
+import { chatJSON, chatStream, type Message } from './llm.js';
 import { PRESETS } from './presets.js';
 import { runReadOnly, UnsafeSqlError, type QueryResult } from './sqlGuard.js';
 
@@ -128,7 +128,8 @@ export async function ask(question: string, history: HistoryItem[] = []): Promis
       if (!sql) throw new Error('The model did not return a SQL query.');
       const result = runReadOnly(sql);
       const chart = normalizeChart(plan.chart, result.columns);
-      const answer = await summarize(question, sql, result).catch(() => null);
+      // The plain-English answer is streamed separately (POST /api/summarize).
+      const answer = null;
       return {
         question,
         sql,
@@ -152,13 +153,22 @@ export async function ask(question: string, history: HistoryItem[] = []): Promis
   throw new Error(`Couldn't build a working query after ${maxAttempts} attempts. Last error: ${lastError}`);
 }
 
-/** Turns the query result into a short plain-English answer. */
-export async function summarize(question: string, sql: string, result: QueryResult): Promise<string> {
-  if (result.rows.length === 0) return 'No readings matched that question.';
+/** Turns the query result into a short plain-English answer, streamed token by token. */
+export async function summarize(
+  question: string,
+  result: Pick<QueryResult, 'columns' | 'rows' | 'truncated'>,
+  onToken: (t: string) => void = () => {},
+  signal?: AbortSignal,
+): Promise<string> {
+  if (result.rows.length === 0) {
+    const text = 'No readings matched that question.';
+    onToken(text);
+    return text;
+  }
   const sample = result.rows.slice(0, 60);
   const table = [result.columns.join(' | '), ...sample.map((r) => result.columns.map((c) => String(r[c] ?? '')).join(' | '))].join('\n');
 
-  const text = await chat(
+  const text = await chatStream(
     [
       {
         role: 'system',
@@ -175,7 +185,8 @@ ${THRESHOLDS}`,
         content: `Question: ${question}\n\nResult (${result.rows.length}${result.truncated ? '+' : ''} rows${result.rows.length > sample.length ? `, first ${sample.length} shown` : ''}):\n${table}`,
       },
     ],
-    { temperature: 0.3, maxTokens: 300 },
+    onToken,
+    { temperature: 0.3, maxTokens: 300, signal },
   );
   return text.trim();
 }

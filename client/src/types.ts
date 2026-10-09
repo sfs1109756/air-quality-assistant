@@ -26,13 +26,13 @@ export interface RoomOverview {
   floor: number;
   zone: string;
   ts: string;
-  pm25: number;
-  pm10: number;
-  co2: number;
-  tvoc: number;
-  temperature: number;
-  humidity: number;
-  pm25_24h: number;
-  co2_24h: number;
-  co2_peak_24h: number;
+  pm25: number | null;
+  pm10: number | null;
+  co2: number | null;
+  tvoc: number | null;
+  temperature: number | null;
+  humidity: number | null;
+  pm25_24h: number | null;
+  co2_24h: number | null;
+  co2_peak_24h: number | null;
 }

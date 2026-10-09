@@ -36,3 +36,21 @@ textarea.sql { min-height: 140px; font-family: ui-monospace, 'SF Mono', Menlo, C
   .suggest .chip { white-space: nowrap; flex-shrink: 0; }
   .ask-form input { font-size: 15px; }
 }
+.caret { display: inline-block; width: 7px; height: 1em; background: var(--accent); margin-left: 2px; vertical-align: -2px; animation: blink-caret 1s steps(2) infinite; }
+@keyframes blink-caret { 50% { opacity: 0; } }
+.datasource { margin-bottom: 16px; }
+.ds-row { justify-content: space-between; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; }
+.ds-actions { gap: 10px; }
+.ds-actions a { color: var(--accent); }
+.datasource .notice, .datasource .error { margin: 8px 0 0; }
+.insights { margin-bottom: 24px; }
+.insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.insight { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); border-top: 3px solid var(--muted); display: flex; flex-direction: column; }
+.insight.critical { border-top-color: var(--bad); }
+.insight.warning { border-top-color: var(--warn); }
+.insight.info { border-top-color: var(--accent); }
+.insight.good { border-top-color: var(--good); }
+.insight-head { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.insight p { margin: 6px 0 8px; flex: 1; }
+.insight button.link { text-align: left; padding: 0; }
+button.link { background: none; color: var(--accent); font-weight: 500; }
