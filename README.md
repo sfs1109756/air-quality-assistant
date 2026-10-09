@@ -62,6 +62,8 @@ npm run build && npm start       # http://localhost:3002
 docker compose up -d && docker compose exec ollama ollama pull qwen2.5:7b
 ```
 
+The server listens on `127.0.0.1` by default, so only this computer can reach it. Set `HOST=0.0.0.0` in `server/.env` to open it to your network (the Docker image does this for you).
+
 ## Using your own data
 
 Click **Import CSV** (or `POST /api/import`). Headers are matched loosely, so most exports work as-is:
